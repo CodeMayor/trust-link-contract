@@ -445,11 +445,7 @@ fn gas_profile_auto_release() {
         &100_u32,
     );
     client.fund_escrow(&id, &buyer);
-    client.mark_shipped(
-        &seller,
-        &id,
-        &SorobanString::from_str(&env, "TRK-GAS-AUTO"),
-    );
+    client.mark_shipped(&seller, &id, &SorobanString::from_str(&env, "TRK-GAS-AUTO"));
     crate::test_helpers::record_delivery_timelocked(&env, &client, &admin, id);
     let delivered_at = client.get_escrow(&id).delivered_at.unwrap();
     env.ledger().set_timestamp(delivered_at + 172_801);
