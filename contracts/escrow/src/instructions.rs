@@ -1625,12 +1625,12 @@ impl Escrow {
     }
 
     /// Releases funds to the payees once the shipping/delivery window has
-    /// elapsed with no dispute raised. Callable by anyone. Reverts with
-    /// `InvalidState` if the escrow is not `Funded`/`Shipped` or has an open
-    /// dispute, `DeliveryNotRecorded` if `Shipped` with no `delivered_at`,
-    /// `DeliveryBeforeDisputeWindow` if the buyer's dispute window hasn't
-    /// opened yet, or `ShippingWindowNotElapsed` if the relevant window
-    /// (delivery-release or shipping) hasn't elapsed. Deducts the protocol
+    /// elapsed with no dispute raised. Callable by anyone, but only for
+    /// `Shipped` escrows. Reverts with `EscrowAlreadyCompleted` for completed
+    /// escrows and `InvalidState` for every other non-Shipped state or if the
+    /// escrow has an open dispute. Returns `DeliveryNotRecorded` if delivery
+    /// has not been recorded, or `ShippingWindowNotElapsed` if the
+    /// delivery-release window has not elapsed. Deducts the protocol
     /// fee, distributes the remainder across `payees`, and transitions the
     /// escrow to `Completed`. Repeated calls on a completed escrow return
     /// `EscrowAlreadyCompleted` before settlement work and emit no event.
@@ -1641,7 +1641,7 @@ impl Escrow {
         if escrow.state == EscrowState::Completed {
             return Err(ContractError::EscrowAlreadyCompleted);
         }
-        if escrow.state != EscrowState::Funded && escrow.state != EscrowState::Shipped {
+        if escrow.state != EscrowState::Shipped {
             return Err(ContractError::InvalidState);
         }
         crate::internal::ensure_not_expired(&env, escrow_id)?;

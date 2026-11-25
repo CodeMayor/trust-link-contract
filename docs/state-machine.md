@@ -31,7 +31,6 @@ stateDiagram-v2
     Funded --> Shipped: mark_shipped
     Funded --> RefundRequested: request_refund
     Funded --> Disputed: raise_dispute
-    Funded --> Completed: auto_release
     Funded --> Expired: reclaim_expired
 
     RefundRequested --> Refunded: mutual_cancel
@@ -106,15 +105,16 @@ stateDiagram-v2
 - Ledger timestamp must be before `dispute_deadline`.
 - Dispute evidence hash is stored as `BytesN<32>`.
 
-### `Funded -> Completed` and `Shipped -> Completed`
+### `Shipped -> Completed`
 
 - `confirm_delivery` requires buyer authorization, the escrow to be `Shipped`,
   and `ledger.timestamp >= dispute_deadline`. Calling it while the dispute
   window is still open returns `DisputeWindowStillOpen`; calling it from
   `Funded` returns `InvalidStateTransition`.
-- `auto_release` requires no signer, rejects escrows with an active dispute, and
-  requires the configured release windows to have elapsed. It accepts both
-  `Funded` (seller never shipped) and `Shipped` escrows.
+- `auto_release` requires no signer, a `Shipped` escrow with recorded delivery,
+  no active dispute, and the configured release window to have elapsed. A
+  `Funded` escrow returns `InvalidState`; keepers must not attempt automatic
+  settlement until the seller has shipped and delivery has been recorded.
 - Completion transfers the payout to the seller using protocol fee logic.
 
 ### `Funded -> RefundRequested`
@@ -195,6 +195,8 @@ batch entry point does not bypass buyer consent.
 - `Completed`, `Refunded`, `Canceled`, and `Expired` are terminal states.
 - Repeating `auto_release` after `Completed` returns
   `EscrowAlreadyCompleted` and emits no second `AutoReleased` event.
+- `auto_release` returns `InvalidState` for every non-`Shipped` state other than
+  `Completed`; a failed call emits no `AutoReleased` event.
 - Self-transitions are invalid.
 - `Pending` escrows cannot be disputed or completed.
 - `Canceled` escrows cannot be funded later.
