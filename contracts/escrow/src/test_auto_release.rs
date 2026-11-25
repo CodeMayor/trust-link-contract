@@ -421,22 +421,22 @@ fn test_auto_release_emits_event() {
 fn test_auto_release_completed_is_idempotent_and_emits_no_duplicate_event() {
     let fix = setup_fixture();
     let amount = 2_500_i128;
-    let seller_val = fix.seller.clone().into_val(&fix.env);
-    let escrow_id = fix.client.create_escrow_8(
-        &seller_val,
+    let escrow_id = fix.client.create_escrow_with_expiration(
+        &fix.seller,
         &Some(fix.buyer.clone()),
         &fix.resolver,
         &fix.token,
         &amount,
         &0_u32,
         &3600_u64,
+        &Some(300_000_u64),
+        &0_u64,
     );
     mint(&fix.env, &fix.token, &fix.buyer, amount);
     fix.client.fund_escrow(&escrow_id, &fix.buyer);
-    fix.env
-        .ledger()
-        .set_timestamp(fix.env.ledger().timestamp() + 200_000);
+    fix.env.ledger().set_timestamp(200_000);
     fix.client.auto_release(&escrow_id);
+    fix.env.ledger().set_timestamp(300_000);
 
     let count_events = || {
         fix.env
