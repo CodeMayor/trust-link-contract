@@ -418,6 +418,55 @@ fn test_auto_release_emits_event() {
 }
 
 #[test]
+fn test_auto_release_completed_is_idempotent_and_emits_no_duplicate_event() {
+    let fix = setup_fixture();
+    let amount = 2_500_i128;
+    let seller_val = fix.seller.clone().into_val(&fix.env);
+    let escrow_id = fix.client.create_escrow_8(
+        &seller_val,
+        &Some(fix.buyer.clone()),
+        &fix.resolver,
+        &fix.token,
+        &amount,
+        &0_u32,
+        &3600_u64,
+    );
+    mint(&fix.env, &fix.token, &fix.buyer, amount);
+    fix.client.fund_escrow(&escrow_id, &fix.buyer);
+    fix.env
+        .ledger()
+        .set_timestamp(fix.env.ledger().timestamp() + 200_000);
+    fix.client.auto_release(&escrow_id);
+
+    let count_events = || {
+        fix.env
+            .events()
+            .all()
+            .filter_by_contract(&fix.client.address)
+            .events()
+            .iter()
+            .filter(|event| match &event.body {
+                soroban_sdk::xdr::ContractEventBody::V0(v0) => {
+                    Val::try_from_val(&fix.env, &v0.data)
+                        .ok()
+                        .and_then(|data| crate::AutoReleased::try_from_val(&fix.env, &data).ok())
+                        .is_some()
+                }
+            })
+            .count()
+    };
+    let event_count = count_events();
+
+    assert_eq!(
+        fix.client.try_auto_release(&escrow_id),
+        Err(Ok(ContractError::EscrowAlreadyCompleted))
+    );
+    assert_eq!(count_events(), event_count);
+    assert_eq!(balance(&fix.env, &fix.token, &fix.seller), amount);
+    assert_eq!(balance(&fix.env, &fix.token, &fix.client.address), 0);
+}
+
+#[test]
 fn test_auto_release_invalid_states_rejected() {
     let fix = setup_fixture();
     let amount = 1000_i128;

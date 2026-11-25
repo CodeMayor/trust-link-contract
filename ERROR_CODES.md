@@ -65,7 +65,7 @@ This document provides a comprehensive reference of all `ContractError` variants
 | **57** | `BasketIndexOutOfBounds` | A basket token list index is out of bounds, indicating a basket-token storage or argument invariant violation. | This is an internal error; contact the contract maintainer. |
 | **58** | `ProtocolFeeExceedsMax` | The global protocol fee exceeds its configured hard cap. | Configure a protocol fee within the allowed limits. |
 | **59** | `ArbitrationFeeExceedsMax` | The arbitration fee exceeds its configured hard cap. | Configure an arbitration fee within the allowed limits. |
-| **60** | `MulticallBatchTooLarge` | A `multicall` batch exceeds `MAX_MULTICALL_BATCH_SIZE`. | Split the batch into smaller calls within the allowed size. |
+| **60** | `MulticallBatchTooLarge` | A `multicall` or `batch_reclaim_expired` batch exceeds `MAX_MULTICALL_BATCH_SIZE` (20). | Split the batch into smaller calls within the allowed size. |
 | **61** | `NotAuthorizedBuyer` | A buyer-only operation was attempted by a caller that is not the escrow's buyer. | Call from the escrow's assigned buyer account. |
 | **62** | `NotAuthorizedSeller` | A seller-only operation (e.g. `mark_shipped`) was attempted by a caller that is not the escrow's primary payee. | Call from the escrow's primary payee (seller) account. |
 | **63** | `EscrowAlreadyCompleted` | An action was attempted on an escrow that has already reached the terminal `Completed` state. | No action required; the escrow lifecycle is finished. |
@@ -86,4 +86,9 @@ This document provides a comprehensive reference of all `ContractError` variants
 | **78** | `InvalidWasmHash` | `execute_upgrade` was called with an all-zero or otherwise invalid WASM hash. | Supply the valid WASM hash of the new contract build. |
 | **79** | `NoPendingTreasury` | `accept_treasury` was called but no pending treasury is set. | The admin must call `set_treasury` first to register a pending treasury. |
 | **80** | `DuplicateResolver` | The same address appears more than once in a resolver configuration. Two triggers share this code (both in `validate_resolvers`, `contracts/escrow/src/internal.rs`): (1) **duplicate multi-resolver** — an address is repeated in a `ResolverSet::Multi` list; (2) **fallback equality** — `primary_resolver == backup_resolver` in a `ResolverSet::Fallback`. Kept distinct from `ConflictingRoles` (23), which means a resolver also holds the Seller or Buyer role. | Ensure every multi-resolver address is unique and that a fallback escrow's primary and backup resolvers are different accounts. |
-| **81** | `EvidenceLimitReached` | `submit_dispute_evidence` was called but the escrow's evidence log already holds `MAX_EVIDENCE_ENTRIES` (5) entries. | No further evidence can be added; rely on the entries already logged. |
+| **81** | `DirectUnpauseBlocked` | `unpause_contract` was called directly while timelocked unpause-only mode is enabled. | Use `queue_unpause_contract` followed by `execute_unpause_contract`. |
+| **82** | `InvalidSplitBps` | A split dispute resolution assigns a payee more than 10,000 basis points. | Keep every split share at or below 10,000 basis points. |
+| **83** | `EvidenceLimitReached` | `submit_dispute_evidence` was called but the escrow's evidence log already holds `MAX_EVIDENCE_ENTRIES` (5) entries. | No further evidence can be added; rely on the entries already logged. |
+| **84** | `NoCancelProposal` | `accept_mutual_cancel` was called when no asynchronous cancellation offer exists. | Have the buyer or primary payee create an offer first. |
+| **85** | `CancelProposalExpired` | `accept_mutual_cancel` was called after the offer's `expires_at` timestamp. | Ask either party to create a new offer. |
+| **86** | `InvalidCancelProposalTtl` | A mutual-cancel offer TTL is zero or longer than 30 days. | Use a TTL from 1 second through 30 days. |
