@@ -382,10 +382,10 @@ export class EscrowClient {
 
   /**
    * Opens a mutual-cancel offer as the buyer or primary payee. The other party
-   * may accept it through `now + ttlSeconds` (inclusive); TTL is 1 second to
-   * 30 days. A new offer replaces the previous one.
+   * may accept it through `now + ttlSeconds` (inclusive). A new offer replaces
+   * the previous one.
    *
-   * @throws `InvalidCancelProposalTtl`, `InvalidState`, `NotAuthorized`.
+   * @throws `ArithmeticOverflow`, `InvalidState`, `NotAuthorized`.
    */
   propose_mutual_cancel(
     caller: AddressLike,

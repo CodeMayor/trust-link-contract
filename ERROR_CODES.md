@@ -91,4 +91,3 @@ This document provides a comprehensive reference of all `ContractError` variants
 | **83** | `EvidenceLimitReached` | `submit_dispute_evidence` was called but the escrow's evidence log already holds `MAX_EVIDENCE_ENTRIES` (5) entries. | No further evidence can be added; rely on the entries already logged. |
 | **84** | `NoCancelProposal` | `accept_mutual_cancel` was called when no asynchronous cancellation offer exists. | Have the buyer or primary payee create an offer first. |
 | **85** | `CancelProposalExpired` | `accept_mutual_cancel` was called after the offer's `expires_at` timestamp. | Ask either party to create a new offer. |
-| **86** | `InvalidCancelProposalTtl` | A mutual-cancel offer TTL is zero or longer than 30 days. | Use a TTL from 1 second through 30 days. |

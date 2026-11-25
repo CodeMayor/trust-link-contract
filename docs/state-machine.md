@@ -174,8 +174,7 @@ batch entry point does not bypass buyer consent.
 ### Asynchronous mutual cancellation
 
 - Either the buyer or primary payee may call `propose_mutual_cancel` with a
-  `ttl_seconds` from 1 second through 30 days while the escrow is `Funded` or
-  `Shipped`.
+  `ttl_seconds` while the escrow is `Funded` or `Shipped`.
 - The other party may call `accept_mutual_cancel` through `expires_at`
   (inclusive). Acceptance refunds the buyer, transitions to `Canceled`, and
   removes the proposal. Missing or expired proposals return

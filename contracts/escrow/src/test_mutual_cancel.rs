@@ -249,7 +249,7 @@ fn test_async_mutual_cancel_accepts_at_ttl_boundary_and_refunds_buyer() {
 }
 
 #[test]
-fn test_async_mutual_cancel_rejects_expired_and_zero_ttl_offers() {
+fn test_async_mutual_cancel_rejects_expired_offers() {
     let env = Env::default();
     env.mock_all_auths();
 
@@ -265,18 +265,6 @@ fn test_async_mutual_cancel_rejects_expired_and_zero_ttl_offers() {
     assert_eq!(
         client.try_accept_mutual_cancel(&seller, &id),
         Err(Ok(ContractError::NoCancelProposal))
-    );
-    assert_eq!(
-        client.try_propose_mutual_cancel(&buyer, &id, &0),
-        Err(Ok(ContractError::InvalidCancelProposalTtl))
-    );
-    assert_eq!(
-        client.try_propose_mutual_cancel(
-            &buyer,
-            &id,
-            &(crate::MAX_CANCEL_PROPOSAL_TTL_SECONDS + 1),
-        ),
-        Err(Ok(ContractError::InvalidCancelProposalTtl))
     );
     client.propose_mutual_cancel(&buyer, &id, &10);
     let stranger = Address::generate(&env);

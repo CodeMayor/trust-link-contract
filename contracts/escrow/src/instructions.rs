@@ -1096,10 +1096,9 @@ impl Escrow {
     }
 
     /// Opens an asynchronous mutual-cancel offer. `caller` must be the buyer
-    /// or primary payee, and `ttl_seconds` must be between 1 second and
-    /// `MAX_CANCEL_PROPOSAL_TTL_SECONDS`. The offer is acceptable through its
-    /// `expires_at` timestamp, inclusive; a later offer replaces any existing
-    /// offer for this escrow.
+    /// or primary payee. The offer is acceptable through its `expires_at`
+    /// timestamp, inclusive; a later offer replaces any existing offer for
+    /// this escrow.
     pub fn propose_mutual_cancel(
         env: Env,
         caller: Address,
@@ -1108,9 +1107,6 @@ impl Escrow {
     ) -> Result<(), ContractError> {
         ensure_action_not_paused(&env, Symbol::new(&env, "propose_mutual_cancel"))?;
         crate::internal::ensure_not_expired(&env, escrow_id)?;
-        if ttl_seconds == 0 || ttl_seconds > crate::MAX_CANCEL_PROPOSAL_TTL_SECONDS {
-            return Err(ContractError::InvalidCancelProposalTtl);
-        }
         let escrow = load_escrow(&env, escrow_id)?;
         if escrow.state != EscrowState::Funded && escrow.state != EscrowState::Shipped {
             return Err(terminal_state_error(
@@ -1144,7 +1140,7 @@ impl Escrow {
             proposed_at: now,
             expires_at,
         };
-        let ttl = crate::MAX_TTL_EXTENSION;
+        let ttl = get_ttl_extension(&env);
         env.storage().persistent().set(&key, &proposal);
         env.storage()
             .persistent()

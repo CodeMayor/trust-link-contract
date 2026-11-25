@@ -219,9 +219,6 @@ pub const MAX_BASKET_SIZE: u32 = 20;
 /// resources partway through. `batch_reclaim_expired` uses the same limit.
 pub const MAX_MULTICALL_BATCH_SIZE: u32 = 20;
 
-/// Maximum lifetime of an asynchronous mutual-cancel offer (30 days).
-pub const MAX_CANCEL_PROPOSAL_TTL_SECONDS: u64 = 2_592_000;
-
 /// Number of escrow ids stored per page of a buyer/vendor index entry.
 ///
 /// The index used to be one unbounded `Vec` per address; sharding it into

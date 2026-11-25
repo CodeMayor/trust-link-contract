@@ -212,6 +212,4 @@ pub enum ContractError {
     NoCancelProposal = 84,
     /// Returned when an asynchronous mutual-cancel offer has expired.
     CancelProposalExpired = 85,
-    /// Returned when a mutual-cancel proposal TTL is outside 1 second–30 days.
-    InvalidCancelProposalTtl = 86,
 }

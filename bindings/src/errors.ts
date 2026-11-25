@@ -93,7 +93,6 @@ export const enum ErrorCode {
   EvidenceLimitReached = 83,
   NoCancelProposal = 84,
   CancelProposalExpired = 85,
-  InvalidCancelProposalTtl = 86,
 }
 
 /** Human-readable message for every contract error code. */
@@ -252,8 +251,6 @@ export const ERROR_MESSAGES: Readonly<Record<ErrorCode, string>> = {
     "No asynchronous mutual-cancel offer exists for this escrow.",
   [ErrorCode.CancelProposalExpired]:
     "The asynchronous mutual-cancel offer has expired.",
-  [ErrorCode.InvalidCancelProposalTtl]:
-    "The mutual-cancel offer TTL must be between 1 second and 30 days.",
 };
 
 /**
