@@ -232,12 +232,12 @@ fn test_auto_release_called_while_funded_is_rejected() {
         fix.client.try_auto_release(&escrow_id),
         Err(Ok(ContractError::InvalidState)),
     );
-    let events = fix
+    let binding = fix
         .env
         .events()
         .all()
-        .filter_by_contract(&fix.client.address)
-        .events();
+        .filter_by_contract(&fix.client.address);
+    let events = binding.events();
     assert!(!events.iter().any(|event| match &event.body {
         soroban_sdk::xdr::ContractEventBody::V0(v0) => {
             Val::try_from_val(&fix.env, &v0.data)

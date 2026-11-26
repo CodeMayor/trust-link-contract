@@ -4,7 +4,7 @@ extern crate std;
 
 use crate::test_helpers::{advance_time, mint_token, setup_contract};
 use crate::{Escrow, EscrowClient, Payee, ResolutionType};
-use soroban_sdk::testutils::Address as _;
+use soroban_sdk::testutils::{Address as _, Ledger};
 use soroban_sdk::{Address, Env, IntoVal, String as SorobanString, Vec};
 
 #[derive(Clone, Debug)]
